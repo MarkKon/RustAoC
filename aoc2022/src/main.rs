@@ -7,14 +7,30 @@ pub mod day1 {
         get_max_sum(&input)
     }
 
+    pub fn solve_problem_2(path: &str) -> u32 {
+        let input = match std::fs::read_to_string(path) {
+            Ok(input) => input,
+            Err(error) => panic!("Error reading input file: {}", error),
+        };
+        get_top_three(&input)
+    }
+
     fn get_max_sum(input: &str) -> u32 {
-        // split at the double newline using regex
         let cells = input.split("\r\n\r\n");
         let max = cells.map(sum_on_cell).max();
         match max {
             Some(max) => max,
             None => 0,
         }
+    }
+
+    fn get_top_three(input: &str) -> u32 {
+        let cells = input.split("\r\n\r\n");
+        let mut nums: Vec<u32> = cells.map(sum_on_cell).collect();
+        nums.sort();
+        nums.reverse();
+        nums.truncate(3);
+        nums.iter().sum()
     }
 
     fn sum_on_cell(cell: &str) -> u32 {
@@ -38,4 +54,5 @@ pub mod day1 {
 
 fn main() {
     println!("The max sum is {}", day1::solve_problem_1("data/day1.txt"));
+    println!("The sum of top three is {}", day1::solve_problem_2("data/day1.txt"));
 }
