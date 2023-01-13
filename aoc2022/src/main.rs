@@ -110,12 +110,54 @@ pub mod day2 {
         }
     }
 
-    fn line_to_points(line: &str) -> u32 {
-        let (player1, player2) = parse_line(line);
+    fn total_points(player1: Move, player2: Move) -> u32 {
         let mp = move_points(&player2);
         let mo = move_outcome(player1, player2);
         let op = outcome_points(mo);
         mp + op
+    }
+
+    fn line_to_points(line: &str) -> u32 {
+        let (player1, player2) = parse_line(line);
+        total_points(player1, player2)
+    }
+
+    fn parse_outcome_line(line: &str) -> (Move, Outcome) {
+        let line = line.trim();
+        let mut moves = line.split(" ");
+        let player1 = match moves.next() {
+            Some("A") => Move::Rock,
+            Some("B") => Move::Paper,
+            Some("C") => Move::Scissors,
+            _ => panic!("Invalid move"),
+        };
+        let outcome = match moves.next() {
+            Some("X") => Outcome::Lose,
+            Some("Y") => Outcome::Draw,
+            Some("Z") => Outcome::Win,
+            _ => panic!("Invalid outcome"),
+        };
+        return (player1, outcome)
+    }
+
+    fn match_move(enemy: &Move, expected_outcome: Outcome) -> Move {
+        match (enemy, expected_outcome) {
+            (Move::Rock, Outcome::Win) => Move::Paper,
+            (Move::Rock, Outcome::Draw) => Move::Rock,
+            (Move::Rock, Outcome::Lose) => Move::Scissors,
+            (Move::Paper, Outcome::Win) => Move::Scissors,
+            (Move::Paper, Outcome::Draw) => Move::Paper,
+            (Move::Paper, Outcome::Lose) => Move::Rock,
+            (Move::Scissors, Outcome::Win) => Move::Rock,
+            (Move::Scissors, Outcome::Draw) => Move::Scissors,
+            (Move::Scissors, Outcome::Lose) => Move::Paper,
+        }
+    }
+
+    fn line_to_outcome_points(line: &str) -> u32 {
+        let (enemy, expected_outcome) = parse_outcome_line(line);
+        let my_move = match_move(&enemy, expected_outcome);
+        total_points(enemy, my_move)
     }
 
     pub fn solve_problem_1(path: &str) -> u32 {
@@ -126,10 +168,20 @@ pub mod day2 {
         let lines = input.split("\r\n");
         lines.map(line_to_points).sum()
     }
+
+
+    pub fn solve_problem_2(path: &str) -> u32 {
+        let input = match std::fs::read_to_string(path) {
+            Ok(input) => input,
+            Err(error) => panic!("Error reading input file: {}", error),
+        };
+        let lines = input.split("\r\n");
+        lines.map(line_to_outcome_points).sum()
+    }
 }
 
 
 fn main() {
-    println!("The max sum is {}", day2::solve_problem_1("data/day2.txt"));
-    //println!("The sum of top three is {}", day1::solve_problem_2("data/day1.txt"));
+    println!("The score in problem 1 is {}", day2::solve_problem_1("data/day2.txt"));
+    println!("The score in problem 2 is {}", day2::solve_problem_2("data/day2.txt"));
 }
