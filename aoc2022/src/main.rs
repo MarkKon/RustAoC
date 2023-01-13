@@ -180,8 +180,49 @@ pub mod day2 {
     }
 }
 
+pub mod day3 {
+    fn priority(c: char) ->u8{
+        match c {
+            'a'..='z' => c as u8 - 'a' as u8 + 1,
+            'A'..='Z' => c as u8 - 'A' as u8 + 27,
+            _ => panic!("Invalid character"),
+        }
+    }
+
+    fn parse_line(line: &str) -> (Vec<char>, Vec<char>) {
+        let line = line.trim();
+        // split at the midpoint
+        let midpoint = match line.len(){
+            x if x % 2 == 0 => x / 2,
+            _ => panic!("Invalid line length"),
+        };
+        let left_vec: Vec<char> = line.chars().take(midpoint).collect();
+        let right_vec: Vec<char> = line.chars().skip(midpoint).collect();
+        (left_vec, right_vec)
+    }
+
+    fn intersect(vec1: &Vec<char>, vec2: &Vec<char>) -> char {
+        // calculate the (unique) character that is in both vectors
+        vec1.iter().find(|&&x| vec2.contains(&x)).unwrap().clone()
+    }
+
+    pub fn solve_problem_1(path: &str) -> u32 {
+        let input = match std::fs::read_to_string(path) {
+            Ok(input) => input,
+            Err(error) => panic!("Error reading input file: {}", error),
+        };
+        let lines = input.split("\r\n");
+        lines.map(|line| {
+            let (left, right) = parse_line(line);
+            let c = intersect(&left, &right);
+            let p = priority(c);
+            p as u32
+        }).sum()
+    }
+}
+
 
 fn main() {
-    println!("The score in problem 1 is {}", day2::solve_problem_1("data/day2.txt"));
-    println!("The score in problem 2 is {}", day2::solve_problem_2("data/day2.txt"));
+    println!("The score in problem 1 is {}", day3::solve_problem_1("data/day3.txt"));
+    // println!("The score in problem 2 is {}", day2::solve_problem_2("data/day2.txt"));
 }
