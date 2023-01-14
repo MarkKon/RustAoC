@@ -206,6 +206,11 @@ pub mod day3 {
         vec1.iter().find(|&&x| vec2.contains(&x)).unwrap().clone()
     }
 
+    fn intersect3(vec1: &Vec<char>, vec2: &Vec<char>, vec3: &Vec<char>) -> char {
+        // calculate the (unique) character that is in all three vectors
+        vec1.iter().find(|&&x| vec2.contains(&x) && vec3.contains(&x)).unwrap().clone()
+    }
+
     pub fn solve_problem_1(path: &str) -> u32 {
         let input = match std::fs::read_to_string(path) {
             Ok(input) => input,
@@ -219,10 +224,28 @@ pub mod day3 {
             p as u32
         }).sum()
     }
+
+    pub fn solve_problem_2(path: &str) -> u32{
+        let input = match std::fs::read_to_string(path) {
+            Ok(input) => input,
+            Err(error) => panic!("Error reading input file: {}", error),
+        };
+        let lines = input.split("\r\n");
+        // split into triples
+        let binding = lines.collect::<Vec<&str>>();
+        let triples = binding.chunks(3);
+        triples.map(|triple| {
+            let triple= triple.iter()
+                .map(|line| line.chars().collect::<Vec<char>>())
+                .collect::<Vec<Vec<char>>>();
+            let c = intersect3(&triple[0], &triple[1], &triple[2]);
+            priority(c) as u32
+        }).sum()
+    }
 }
 
 
 fn main() {
     println!("The score in problem 1 is {}", day3::solve_problem_1("data/day3.txt"));
-    // println!("The score in problem 2 is {}", day2::solve_problem_2("data/day2.txt"));
+    println!("The score in problem 2 is {}", day3::solve_problem_2("data/day3.txt"));
 }
