@@ -306,7 +306,130 @@ pub mod day4 {
     }
 }
 
+pub mod day5 {
+    // wrap Vec<Vec<char>> to make it safe to use
+    struct Stock {
+        stock_field: Vec<Vec<char>>,
+    }
+
+    // implement methods for Stock
+    impl Stock {
+        fn stock_move(from: u8, to: u8, stock: &mut Stock){
+            let c = stock.stock_field[from as usize].pop().unwrap();
+            stock.stock_field[to as usize].push(c);
+        }
+
+        fn stock_move_multiple(from: u8, to: u8, num: u8, stock: &mut Stock){
+            // move num crates from from to to and preserve order
+            let mut move_crates = Vec::new();
+            for _ in 0..num{
+                move_crates.push(stock.stock_field[from as usize].pop().unwrap());
+            }
+            move_crates.reverse();
+            for c in move_crates{
+                stock.stock_field[to as usize].push(c);
+            }
+        }
+
+        fn top(stock: &Stock) -> Vec<char>{
+            stock.stock_field.iter().map(|s| s.last().unwrap().clone()).collect::<Vec<char>>()
+        }
+
+        fn from_path(path: &str) -> Stock{
+            let input = match std::fs::read_to_string(path) {
+                Ok(input) => input,
+                Err(error) => panic!("Error reading input file: {}", error),
+            };
+            // take out everything after the double newline
+            let input = input.split("\r\n\r\n").next().unwrap();
+            let mut lines = input.split("\r\n").collect::<Vec<&str>>();
+    
+            let first_line = lines.pop().unwrap().trim();
+            let num_crates = first_line.split(" ").last().unwrap();
+            let num_crates = num_crates.parse::<u8>().unwrap();
+    
+            // reverse the order in lines
+            lines.reverse();
+            let clone = lines.clone();
+            let num_lines = clone.len();
+            // get the last number in line
+            
+            // reserve space for num_crates crates of size num_lines
+            let mut crates: Vec<Vec<char>> = Vec::with_capacity(num_crates as usize);
+            for _ in 0..num_crates{
+                crates.push(Vec::with_capacity(num_lines));
+            };
+            for line in lines.iter(){
+                // split at every 4th character
+                let chars = line.chars().collect::<Vec<char>>();
+                let copy = chars.clone();
+                let chunked = copy.chunks(4);
+                for (i, chunk) in chunked.enumerate(){
+                    let c = chunk[1];
+                    if c != ' '{
+                        crates[i].push(c);
+                    };
+                };
+            };
+            Stock{stock_field: crates}
+        }
+    }
+
+    fn parse_move(s: &str) -> (u8,u8, u8){
+        // line like "Move x from y to z" should be parsed to (x, y, z)
+        let s = s.trim();
+        let mut split = s.split(" ");
+        let _ = split.next().unwrap();
+        let x = split.next().unwrap();
+        let _ = split.next().unwrap();
+        let y = split.next().unwrap();
+        let _ = split.next().unwrap();
+        let z = split.next().unwrap();
+        let x = x.parse::<u8>().unwrap();
+        let y = y.parse::<u8>().unwrap();
+        let z = z.parse::<u8>().unwrap();
+        (x, y, z)
+    }
+
+    pub fn solve_problem_1(path: &str) -> Vec<char>{
+        let mut stock = Stock::from_path(path);
+        let input = match std::fs::read_to_string(path) {
+            Ok(input) => input,
+            Err(error) => panic!("Error reading input file: {}", error),
+        };
+        let lines = input.split("\r\n\r\n").collect::<Vec<&str>>();
+        let moves = lines[1].split("\r\n");
+        for line in moves{
+            let (x, y, z) = parse_move(line);
+            for _ in 0..x{
+                Stock::stock_move(y-1, z-1, &mut stock);
+            };
+        };
+        Stock::top(&stock)
+    }
+
+    pub fn solve_problem_2(path: &str) -> Vec<char>{
+        let mut stock = Stock::from_path(path);
+        let input = match std::fs::read_to_string(path) {
+            Ok(input) => input,
+            Err(error) => panic!("Error reading input file: {}", error),
+        };
+        let lines = input.split("\r\n\r\n").collect::<Vec<&str>>();
+        let moves = lines[1].split("\r\n");
+        for line in moves{
+            let (x, y, z) = parse_move(line);
+            Stock::stock_move_multiple(y-1, z-1, x, &mut stock);
+        };
+        Stock::top(&stock)
+    }
+
+}
+
+use std::env;
+
 fn main() {
-    println!("The score in problem 1 is {}", day4::solve_problem_1("data/day4.txt"));
-    println!("The score in problem 2 is {}", day4::solve_problem_2("data/day4.txt"));
+    //env::set_var("RUST_BACKTRACE", "1");
+    // debug read_crates
+    println!("The score in problem 1 is {:?}", day5::solve_problem_1("data/day5.txt"));
+    println!("The score in problem 2 is {:?}", day5::solve_problem_2("data/day5.txt"));
 }
