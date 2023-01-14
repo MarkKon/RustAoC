@@ -425,11 +425,50 @@ pub mod day5 {
 
 }
 
-use std::env;
+pub mod day6 {
+    fn check_packet(packet: &Vec<char>)-> bool{
+        // check if all characters in packet are different
+        let mut chars = packet.clone();
+        chars.sort();
+        chars.dedup();
+        chars.len() == packet.len()
+    }
+
+    pub fn solve_problem_1(path: &str) -> Option<usize> {
+        let input = match std::fs::read_to_string(path) {
+            Ok(input) => input,
+            Err(error) => panic!("Error reading input file: {}", error),
+        };
+        for i in 0..input.len()-4{
+            let s = &input[i..i+4];
+            if check_packet(&s.chars().collect::<Vec<char>>()){
+                return Some(i+4);
+            };
+        };
+        None
+    }
+
+    pub fn solve_problem_2(path: &str) -> Option<usize> {
+        let input = match std::fs::read_to_string(path) {
+            Ok(input) => input,
+            Err(error) => panic!("Error reading input file: {}", error),
+        };
+        for i in 0..input.len()-14{
+            let s = &input[i..i+14];
+            if check_packet(&s.chars().collect::<Vec<char>>()){
+                return Some(i+14);
+            };
+        };
+        None
+    }
+}
+
+
+// use std::env;
 
 fn main() {
     //env::set_var("RUST_BACKTRACE", "1");
     // debug read_crates
-    println!("The score in problem 1 is {:?}", day5::solve_problem_1("data/day5.txt"));
-    println!("The score in problem 2 is {:?}", day5::solve_problem_2("data/day5.txt"));
+    println!("The score in problem 1 is {:?}", day6::solve_problem_1("data/day6.txt"));
+    println!("The score in problem 2 is {:?}", day6::solve_problem_2("data/day6.txt"));
 }
