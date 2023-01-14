@@ -244,8 +244,69 @@ pub mod day3 {
     }
 }
 
+pub mod day4 {
+    struct Range{
+        lower: u32,
+        upper: u32,
+    }
+
+    fn safe_parse(s: &str) -> Option<u32>{
+        match s.parse::<u32>(){
+            Ok(x) => Some(x),
+            Err(_) => None,
+        }
+    }
+
+    fn parse_range(s: &str) -> Range{
+        let s = s.trim();
+        let mut split = s.split("-");
+        let lower = split.next().unwrap();
+        let upper = split.next().unwrap();
+        let lower = safe_parse(lower).unwrap();
+        let upper = safe_parse(upper).unwrap();
+        Range{lower, upper}
+    }
+
+    fn parse_line(line: &str) -> (Range, Range){
+        let line = line.trim();
+        let both = line.split(",").collect::<Vec<&str>>();
+        if both.len() != 2{
+            panic!("Invalid line, should be two ranges separated by a comma");
+        };
+        let (left, right) = (both[0], both[1]);
+        let left = parse_range(left);
+        let right = parse_range(right);
+        (left, right)
+    }
+
+    fn contained(r1: &Range, r2: &Range) -> bool{
+        r1.lower >= r2.lower && r1.upper <= r2.upper || r2.lower >= r1.lower && r2.upper <= r1.upper
+    }
+
+    fn overlap_some(r1: &Range, r2: &Range) -> bool{
+        r1.upper >= r2.lower && r1.upper <= r2.upper || r2.upper >= r1.lower && r2.upper <= r1.upper
+    }
+
+    pub fn solve_problem_1(path: &str) -> u32{
+        let input = match std::fs::read_to_string(path) {
+            Ok(input) => input,
+            Err(error) => panic!("Error reading input file: {}", error),
+        };
+        let lines = input.split("\r\n");
+        lines.map(parse_line).filter(|(r1, r2)| contained(r1, r2)).count() as u32
+    }
+
+    pub fn solve_problem_2(path: &str) -> u32{
+        let input = match std::fs::read_to_string(path) {
+            Ok(input) => input,
+            Err(error) => panic!("Error reading input file: {}", error),
+        };
+        let lines = input.split("\r\n");
+        lines.map(parse_line).filter(|(r1, r2)| overlap_some(r1, r2)).count() as u32
+    }
+}
 
 fn main() {
-    println!("The score in problem 1 is {}", day3::solve_problem_1("data/day3.txt"));
-    println!("The score in problem 2 is {}", day3::solve_problem_2("data/day3.txt"));
+    println!("The score in problem 1 is {}", day4::solve_problem_1("data/day4.txt"));
+    println!("The score in problem 2 is {}", day4::solve_problem_2("data/day4.txt"));
 }
